@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <set>
 #include <string>
+#include <ctime>
 #include <map>
 
 #define dbg(x) cout << #x ": " << x << endl
@@ -37,28 +38,48 @@ int cost_func (set<int> a, int M){
     return acc;
 }
 
-ll calc_index(set<int> cur_set, set<int>a){
+ll calc_index(set<int> cur_set, set<ll> indexes_weight, set<int>a){
     int index = 0;
     ll acc = 0;
-    for(auto element_a : a){
+    /*for(auto element_a : a){
         if(cur_set.find(element_a) != cur_set.end()){
             acc += pow(2, index);   
         }
         
         index++;
+    }*/
+
+    for (auto index : indexes_weight){
+        acc += index;
     }
     
     return acc;
 }
 
-int rec(set<int> cur_set, set<int>a, int M){
+int rec(set<int> cur_set, set<int>a, set<ll> indexes_weight, int M){
     /*
     cout << "cur_set: ";
     for (auto k : cur_set)
         cout << k << " ";
+    cout << endl;
+
+    cout << "indexes: ";
+    for (auto k : indexes_weight)
+        cout << k << " ";
     cout << endl;*/
 
-    ll visited_index = calc_index(cur_set, a);
+    ll visited_index;
+/*
+ * 
+ * 
+ * 
+ *  
+ */
+
+    if (cur_set.size() == a.size())
+        visited_index = pow(2, a.size()) - 1;
+    else
+        visited_index = calc_index(cur_set, indexes_weight, a);
 
     //cout << visited_index << endl;
 
@@ -74,32 +95,46 @@ int rec(set<int> cur_set, set<int>a, int M){
     }
     cout << endl;*/
     int tmp_cost;
-
+    int index = 0;
 
     for (auto it : a){
         set<int> next_set;
+        set<ll> next_index;
         //copy(cur_set.begin(), cur_set.end(), next_set);
-        for (auto value : cur_set)
+        for (auto value : cur_set){
             next_set.insert(value);
+        }
+        for (auto weight : indexes_weight){
+            next_index.insert(weight);
+        }
+
         if (find(cur_set.begin(), cur_set.end(), it) == cur_set.end()){
             next_set.insert(it);
-            //cout << "chegou aqui" << endl;
+            next_index.insert(pow(2, index));
 
+            //cout << "chegou aqui" << endl;
             
-            tmp_cost = rec(next_set, a, M);
-            if (tmp_cost < min_cost)
+            tmp_cost = rec(next_set, a, next_index, M);
+            if (tmp_cost < min_cost){
                 min_cost = tmp_cost;
+            }
         }
+        index ++;
     }
     return min_cost;
 }
 
 int main(){
     ll T;
+    clock_t start, end;
+
+    start = clock();
+
     cin >> T;
     
     for (int i = 0; i < T; i ++){
         set<int> a, cur_set;
+        set<ll> indexes_set;
         int M;
         int N;
         int tmp, tmp1, tmp2;
@@ -114,14 +149,18 @@ int main(){
         
         visited.clear();
         cur_set.insert(*a.begin());
+        indexes_set.insert(1);
         
         
-        int min = rec(cur_set, a, M);
+        int min = rec(cur_set, a, indexes_set, M);
 
         cout << min << endl;
         
     }  
 
+    end = clock();
+
+    cout << "Execution time: " << double(end - start) / CLOCKS_PER_SEC  << endl;
 
     return 0;
 }
